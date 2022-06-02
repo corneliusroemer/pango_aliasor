@@ -9,6 +9,8 @@ def test_uncompression():
     assert aliasor.uncompress('AY.4') == 'B.1.617.2.4'
     assert aliasor.uncompress('AY.4.3.2') == 'B.1.617.2.4.3.2'
     assert aliasor.uncompress('B.1') == 'B.1'
+    assert aliasor.uncompress('B') == 'B'
+    assert aliasor.uncompress('') == ''
 
 def test_compression():
     aliasor = Aliasor()
@@ -17,6 +19,8 @@ def test_compression():
     assert aliasor.compress('B.1.617.2.4.3.1') == 'AY.4.3.1'
     assert aliasor.compress('B.1.617.2') == 'B.1.617.2'
     assert aliasor.compress('B.1') == 'B.1'
+    assert aliasor.compress('B') == 'B'
+    assert aliasor.compress('') == ''
 
 def test_except_recombinants():
     aliasor = Aliasor()

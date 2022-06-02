@@ -29,7 +29,7 @@ class Aliasor:
         name_split = name.split('.')
         levels = len(name_split) - 1
         num_indirections = (levels -1) // 3
-        if num_indirections == 0:
+        if num_indirections <= 0:
             return name
         alias = ".".join(name_split[0:(3*num_indirections + 1)])
         ending = ".".join(name_split[(3*num_indirections + 1):])
@@ -38,7 +38,10 @@ class Aliasor:
     def uncompress(self,name):
         name_split = name.split('.')
         letter = name_split[0]
-        unaliased = self.alias_dict[letter]
+        try:
+            unaliased = self.alias_dict[letter]
+        except KeyError:
+            return name
         if len(name_split) == 1:
             return name
         if len(name_split) == 2:
