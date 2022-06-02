@@ -3,7 +3,7 @@ from pango_aliasor.aliasor import Aliasor
 def test_pango_designation_init():
     aliasor = Aliasor()
 
-def test_decompression():
+def test_uncompression():
     aliasor = Aliasor()
     assert aliasor.uncompress('BA.1') == 'B.1.1.529.1'
     assert aliasor.uncompress('AY.4') == 'B.1.617.2.4'
@@ -25,8 +25,8 @@ def test_except_recombinants():
 
 def test_double_alias_compression():
     aliasor = Aliasor()
-    assert aliasor.compress('BA.5.3.1.1') == 'BE.1'
+    assert aliasor.compress('B.1.1.529.5.3.1.1') == 'BE.1'
 
-def test_double_alias_decompression():
+def test_double_alias_uncompression():
     aliasor = Aliasor()
-    assert aliasor.decompress('BE.1') == 'BA.5.3.1.1'
+    assert aliasor.uncompress('BE.1') == 'B.1.1.529.5.3.1.1'
