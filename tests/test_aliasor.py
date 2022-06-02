@@ -22,3 +22,11 @@ def test_except_recombinants():
     aliasor = Aliasor()
     assert aliasor.uncompress('XA.1') == 'XA.1'
     assert aliasor.compress('XA.1') == 'XA.1'
+
+def test_double_alias_compression():
+    aliasor = Aliasor()
+    assert aliasor.compress('BA.5.3.1.1') == 'BE.1'
+
+def test_double_alias_decompression():
+    aliasor = Aliasor()
+    assert aliasor.decompress('BE.1') == 'BA.5.3.1.1'
