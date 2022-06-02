@@ -4,10 +4,11 @@ class Aliasor:
         import pandas as pd
 
         if alias_file is None:
-            import importlib.resources
+            # import importlib.resources
 
-            with importlib.resources.open_text("pango_designation", "alias_key.json") as file:
-                aliases = pd.read_json(file)
+            aliases = pd.read_json("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json")
+            # with importlib.resources.open_text("pango_designation", "alias_key.json") as file:
+            #     aliases = pd.read_json(file)
 
         else:
             aliases = pd.read_json(alias_file)
@@ -26,13 +27,13 @@ class Aliasor:
 
     def compress(self,name):
         name_split = name.split('.')
-        if len(name_split) < 5:
+        levels = len(name_split) - 1
+        num_indirections = (levels -1) // 3
+        if num_indirections == 0:
             return name
-        letter = self.realias_dict[".".join(name_split[0:4])]
-        if len(name_split) == 5:
-            return letter + '.' + name_split[4]
-        else:
-            return letter + '.' + ".".join(name_split[4:])
+        alias = ".".join(name_split[0:(3*num_indirections + 1)])
+        ending = ".".join(name_split[(3*num_indirections + 1):])
+        return self.realias_dict[alias] + '.' + ending
 
     def uncompress(self,name):
         name_split = name.split('.')
@@ -44,3 +45,4 @@ class Aliasor:
             return unaliased + '.' + name_split[1]
         else:
             return unaliased + '.' + ".".join(name_split[1:])
+# %%
