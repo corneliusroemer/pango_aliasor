@@ -1,27 +1,23 @@
 #%%
 class Aliasor:
     def __init__(self, alias_file=None):
-        import pandas as pd
+        import json
 
         if alias_file is None:
-            # import importlib.resources
+            import importlib.resources
 
-            aliases = pd.read_json("https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json")
-            # with importlib.resources.open_text("pango_designation", "alias_key.json") as file:
-            #     aliases = pd.read_json(file)
+            with importlib.resources.open_text("pango_designation", "alias_key.json") as file:
+                file = json.load(file)
 
         else:
-            aliases = pd.read_json(alias_file)
+            file = json.load(alias_file)
 
         self.alias_dict = {}
-        for column in aliases.columns:
-            if column.startswith('X'):
+        for column in file.keys():
+            if type(file[column]) is list or file[column] == "":
                 self.alias_dict[column] = column
             else:
-                self.alias_dict[column] = aliases[column][0]
-
-        self.alias_dict['A'] = 'A'
-        self.alias_dict['B'] = 'B'
+                self.alias_dict[column] = file[column]
 
         self.realias_dict = {v: k for k, v in self.alias_dict.items()}
 
