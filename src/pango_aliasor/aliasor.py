@@ -10,7 +10,8 @@ class Aliasor:
                 file = json.load(file)
 
         else:
-            file = json.load(alias_file)
+            with open(alias_file) as file:
+                file = json.load(file)
 
         self.alias_dict = {}
         for column in file.keys():
