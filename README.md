@@ -42,3 +42,7 @@ Run `pytest` from the project root to run all tests.
 
 ## Release
 
+1. Bump version in `setup.cfg`
+2. Release using `gh release create`
+3. Build using `python3 -m build`
+4. Publish to Pypi using `twine upload dist/pango_aliasor*
