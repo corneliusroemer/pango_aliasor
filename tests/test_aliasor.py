@@ -60,3 +60,23 @@ def test_double_alias_uncompression():
 def test_read_from_file(datadir):
     aliasor = Aliasor(datadir.join('alias_key.json'))
     assert aliasor.compress('B.1.1.529.1') == 'BA.1'
+
+def test_partial_alias_up_to():
+    aliasor = Aliasor()
+    assert aliasor.partial_compress('B.1.1.529.1.2', up_to = 0) == 'B.1.1.529.1.2'
+    assert aliasor.partial_compress('B.1.1.529.2.75.1.2', up_to = 1) == 'BA.2.75.1.2'
+    assert aliasor.partial_compress('B.1.1.529.2.75.1.2', up_to = 2) == 'BL.2'
+
+def test_partial_alias_accepted():
+    aliasor = Aliasor()
+    assert aliasor.partial_compress('B.1.1.529.1.2', accepted_aliases={"BA","AZ"}) == "BA.1.2"
+    assert aliasor.partial_compress('B.1.617.2.3', accepted_aliases={"BA","AZ"}) == "B.1.617.2.3"
+    assert aliasor.partial_compress('B.1.1.529.2.75.1.2', accepted_aliases={"BA"}) == 'BA.2.75.1.2'
+
+def test_partial_alias_combination():
+    aliasor = Aliasor()
+    assert aliasor.partial_compress('B.1.1.529.1.2',up_to=1, accepted_aliases={"BA","AZ"}) == "BA.1.2"
+    assert aliasor.partial_compress('B.1.617.2.3',up_to=1, accepted_aliases={"BA","AZ"}) == "AY.3"
+    assert aliasor.partial_compress('B.1.1.529.2.75.1.2',up_to=3, accepted_aliases={"BA"}) == 'BL.2'
+    assert aliasor.partial_compress('B.1.1.529.2.75.1.2',up_to=4, accepted_aliases={"BA"}) == 'BL.2'
+    assert aliasor.partial_compress('B.1.1.529.2.75.1.2',up_to=1, accepted_aliases={"BA"}) == 'BA.2.75.1.2'

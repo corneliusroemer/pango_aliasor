@@ -26,6 +26,14 @@ aliasor.uncompress("XA") # 'XA'
 
 # Go from unaliased lineage to aliased lineage
 aliasor.compress("B.1.1.529.3.1") # 'BA.3.1'
+
+aliasor.partial_compress("B.1.1.529.3.1",up_to=1) # 'BA.3.1'
+aliasor.partial_compress("B.1.1.529.3.1.1.2",up_to=1) # 'BA.3.1.1.2'
+
+aliasor.partial_compress("B.1.1.529.3.1",accepted_aliases=["AY"]) # 'B.1.1.529.3.1'
+aliasor.partial_compress("B.1.617.2",accepted_aliases=["AY"]) # 'AY.2'
+
+aliasor.partial_compress('B.1.1.529.2.75.1.2',up_to=4, accepted_aliases={"BA"}) == 'BL.2'
 ```
 
 See [tests](tests/test_aliasor.py) for more examples.
