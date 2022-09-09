@@ -80,3 +80,11 @@ def test_partial_alias_combination():
     assert aliasor.partial_compress('B.1.1.529.2.75.1.2',up_to=3, accepted_aliases={"BA"}) == 'BL.2'
     assert aliasor.partial_compress('B.1.1.529.2.75.1.2',up_to=4, accepted_aliases={"BA"}) == 'BL.2'
     assert aliasor.partial_compress('B.1.1.529.2.75.1.2',up_to=1, accepted_aliases={"BA"}) == 'BA.2.75.1.2'
+
+def test_collapse():
+    aliasor = Aliasor()
+    assert aliasor.collapse('B.1.1.529.3.1', potential_parents=['BA.3']) == 'BA.3'
+    assert aliasor.collapse('B.1.1.529.3.1', potential_parents=['BA.3', 'BA.3.1']) == 'BA.3.1'
+    assert aliasor.collapse('B.1.1.529.3.1', potential_parents=['B.1.1', 'BZ.1', 'AY.4']) == 'B.1.1'
+    assert aliasor.collapse('B.1.1.529.3.1', potential_parents=['A']) == 'B.1.1.529.3.1'
+    assert aliasor.collapse('XA.1', potential_parents=['B.1.1', 'BZ.1', 'AY.4']) == 'XA.1'
