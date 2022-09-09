@@ -87,7 +87,7 @@ class Aliasor:
 
     def collapse(self, uncompressed_lineage: str, potential_parents: List[str]):
         """
-        Compress an uncompressed_lineage upto the first potential_parent lineage.
+        Compress an uncompressed_lineage up to the first potential_parent lineage.
         If no parents are found return the uncompressed_lineage.
         
         aliasor.collapse("B.1.1.529.3.1", potential_parents=['BA.3']) # 'BA.3'

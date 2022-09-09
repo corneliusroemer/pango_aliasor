@@ -34,6 +34,12 @@ aliasor.partial_compress("B.1.1.529.3.1",accepted_aliases=["AY"]) # 'B.1.1.529.3
 aliasor.partial_compress("B.1.617.2",accepted_aliases=["AY"]) # 'AY.2'
 
 aliasor.partial_compress('B.1.1.529.2.75.1.2',up_to=4, accepted_aliases={"BA"}) == 'BL.2'
+
+# Compress an uncompressed_lineage up to the first potential_parent lineage. If no parents are found return the uncompressed_lineage.
+aliasor.collapse("B.1.1.529.3.1", potential_parents=['BA.3']) # 'BA.3'
+aliasor.collapse("B.1.1.529.3.1", potential_parents=['BA.3', 'BA.3.1']) # 'BA.3.1'
+aliasor.collapse("B.1.1.529.3.1", potential_parents=['B.1.1', 'BZ.1', 'AY.4']) # 'B.1.1'
+aliasor.collapse("B.1.1.529.3.1", potential_parents=['A']) # "B.1.1.529.3.1"
 ```
 
 See [tests](tests/test_aliasor.py) for more examples.
