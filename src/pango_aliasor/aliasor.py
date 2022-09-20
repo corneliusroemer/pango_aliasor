@@ -9,20 +9,20 @@ class Aliasor:
             with urllib.request.urlopen(
                 "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json"
             ) as data:
-                file = json.load(data)
+                pango_dict = json.load(data)
 
         else:
             with open(alias_file) as file:
-                file = json.load(file)
+                pango_dict = json.load(file)
 
         self.alias_dict = {}
         for column in file.keys():
-            if type(file[column]) is list or file[column] == "":
+            if type(pango_dict[column]) is list or pango_dict[column] == "":
                 self.alias_dict[column] = column
             else:
-                self.alias_dict[column] = file[column]
+                self.alias_dict[column] = pango_dict[column]
 
-        self.realias_dict = {v: k for k, v in self.alias_dict.items()}
+        self.realias_dict = {v: k for k, v in self.alias_dict.items()} 
 
     def compress(self, name):
         name_split = name.split(".")
@@ -47,6 +47,34 @@ class Aliasor:
             return unaliased + "." + name_split[1]
         else:
             return unaliased + "." + ".".join(name_split[1:])
+    
+    def enable_expansion(self):
+        import urllib.request
+        with urllib.request.urlopen(
+            "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/lineage_notes.txt"
+        ) as data:
+            self.pango_list = []
+            for line in (data.read()).decode().split("\n")[1:]:
+                if line:
+                    self.pango_list.append(self.uncompress(line.split()[0]))
+    
+    def expand_compress(self, name, exclude=[]):
+        full_prefix=self.uncompress(name)
+        result=[]
+        exclude_full = set([j for i in exclude for j in self.expand_uncompress(i)]) if exclude else set([])
+        for k in self.pango_list:
+            if k not in exclude_full and k.startswith(full_prefix):
+                result.append(self.compress(k))
+        return result
+
+    def expand_uncompress(self, name, exclude=[]):
+        full_prefix=self.uncompress(name)
+        result=[]
+        exclude_full = set([j for i in exclude for j in self.expand_uncompress(i)]) if exclude else set([])
+        for k in self.pango_list:
+            if k not in exclude_full and k.startswith(full_prefix):
+                result.append(k)
+        return result
     
     def partial_compress(self, name, up_to: int = 0, accepted_aliases: set = {}):
         """
