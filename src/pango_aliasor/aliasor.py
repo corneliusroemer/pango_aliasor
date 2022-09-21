@@ -16,7 +16,7 @@ class Aliasor:
                 pango_dict = json.load(file)
 
         self.alias_dict = {}
-        for column in file.keys():
+        for column in pango_dict.keys():
             if type(pango_dict[column]) is list or pango_dict[column] == "":
                 self.alias_dict[column] = column
             else:
