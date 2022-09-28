@@ -110,5 +110,23 @@ class Aliasor:
 
         return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
 
+    def partition_focus(self,vocs): 
+        #instead of prefixes check for proper subsets of expansions, if they exclude them all
+        result={}
+        voc_dict = {k:{"exclude":set([]),"query":set(self.expand_compress(k))} for k in vocs}
+        for i,k in enumerate(vocs):
+            if i+1 < len(vocs):
+                kset=voc_dict.get(k).get("query")
+                for j in vocs[i+1:]:
+                    jset=voc_dict.get(j).get("query")
+                    if jset.issubset(kset):
+                        voc_dict.get(k).get("exclude").update(jset)
+                    if kset.issubset(jset):
+                        voc_dict.get(j).get("exclude").update(kset)
+        for k,v in voc_dict.items():
+            v.get("query").difference_update(v.get("exclude"))
+            result[k]=list(v.get("query"))
+        return result
+
 
 # %%
