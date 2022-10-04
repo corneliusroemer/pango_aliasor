@@ -72,6 +72,7 @@ def test_partial_alias_accepted():
     assert aliasor.partial_compress('B.1.1.529.1.2', accepted_aliases={"BA","AZ"}) == "BA.1.2"
     assert aliasor.partial_compress('B.1.617.2.3', accepted_aliases={"BA","AZ"}) == "B.1.617.2.3"
     assert aliasor.partial_compress('B.1.1.529.2.75.1.2', accepted_aliases={"BA"}) == 'BA.2.75.1.2'
+    assert aliasor.partial_compress('B', accepted_aliases={"BA"}) == 'B'
 
 def test_partial_alias_combination():
     aliasor = Aliasor()

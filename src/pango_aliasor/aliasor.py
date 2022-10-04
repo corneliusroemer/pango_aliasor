@@ -80,6 +80,8 @@ class Aliasor:
                         alias = self.realias_dict[to_alias]
                         return alias + "." + ".".join(name_split[(3 * level + 1) :])
 
+        if name_split[(3 * up_to + 1) :] == []:
+            return alias
         return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
 
 
