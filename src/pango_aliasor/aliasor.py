@@ -1,4 +1,7 @@
 #%%
+from typing import List
+
+
 class Aliasor:
     def __init__(self, alias_file=None):
         import json
@@ -84,5 +87,28 @@ class Aliasor:
             return alias
         return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
 
+    def collapse(self, uncompressed_lineage: str, potential_parents: List[str]):
+        """
+        Compress an uncompressed_lineage up to the first potential_parent lineage.
+        If no parents are found return the uncompressed_lineage.
+        
+        aliasor.collapse("B.1.1.529.3.1", potential_parents=['BA.3']) # 'BA.3'
+
+        aliasor.collapse("B.1.1.529.3.1", potential_parents=['BA.3', 'BA.3.1']) # 'BA.3.1'
+
+        aliasor.collapse("B.1.1.529.3.1", potential_parents=['B.1.1', 'BZ.1', 'AY.4']) # 'B.1.1'
+
+        aliasor.collapse("B.1.1.529.3.1", potential_parents=['A']) # "B.1.1.529.3.1"
+        """
+        compressed_lineage = self.compress(uncompressed_lineage)
+        if compressed_lineage in potential_parents:
+            return compressed_lineage
+        parts = uncompressed_lineage.split(".")
+        compressed_parent_lineage = uncompressed_lineage
+        for i in range(1, len(parts)):
+            compressed_parent_lineage = self.compress(".".join(parts[:-i]))
+            if compressed_parent_lineage in potential_parents:
+                return compressed_parent_lineage
+        return uncompressed_lineage
 
 # %%
