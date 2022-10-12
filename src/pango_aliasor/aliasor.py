@@ -60,8 +60,11 @@ class Aliasor:
     
     def expand_compress(self, name, exclude=[]):
         full_prefix=self.uncompress(name)
-        result=[]
+        result=[] 
         exclude_full = set([j for i in exclude for j in self.expand_uncompress(i)]) if exclude else set([])
+        if self.uncompress(name) not in exclude_full:
+            result.append(self.compress(name)) #hack to make the parent name come first
+            exclude_full.add(self.uncompress(name))
         for k in self.pango_list:
             if k not in exclude_full and k.startswith(full_prefix):
                 result.append(self.compress(k))
@@ -71,6 +74,9 @@ class Aliasor:
         full_prefix=self.uncompress(name)
         result=[]
         exclude_full = set([j for i in exclude for j in self.expand_uncompress(i)]) if exclude else set([])
+        if self.uncompress(name) not in exclude_full:
+            result.append(self.uncompress(name)) #hack to make the parent name come first
+            exclude_full.add(self.uncompress(name))
         for k in self.pango_list:
             if k not in exclude_full and k.startswith(full_prefix):
                 result.append(k)
@@ -110,7 +116,10 @@ class Aliasor:
 
         return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
 
-    def partition_focus(self,vocs): 
+    """
+    Carves up an array of pangolin lineages to non-overlapping sublineages
+    """
+    def partition_focus(self,vocs,remove_self=True): 
         #instead of prefixes check for proper subsets of expansions, if they exclude them all
         result={}
         voc_dict = {k:{"exclude":set([]),"query":set(self.expand_compress(k))} for k in vocs}
@@ -124,9 +133,27 @@ class Aliasor:
                     if kset.issubset(jset):
                         voc_dict.get(j).get("exclude").update(kset)
         for k,v in voc_dict.items():
+            if remove_self:
+                v.get("exclude").add(k)
             v.get("query").difference_update(v.get("exclude"))
             result[k]=list(v.get("query"))
         return result
-
+    """
+    For the given array, produce a dictionary of who subsumes who.
+    """
+    def map_dependent(self,vocs): 
+        #instead of prefixes check for proper subsets of expansions, if they exclude them all
+        result={}
+        voc_dict = {k:{"exclude":set([]),"query":set(self.expand_compress(k))} for k in vocs}
+        for i,k in enumerate(vocs):
+            if i+1 < len(vocs):
+                kset=voc_dict.get(k).get("query")
+                for j in vocs[i+1:]:
+                    jset=voc_dict.get(j).get("query")
+                    if jset.issubset(kset):
+                        result.setdefault(k,set([])).add(j)
+                    if kset.issubset(jset):
+                        result.setdefault(j,set([])).add(k)
+        return result
 
 # %%
