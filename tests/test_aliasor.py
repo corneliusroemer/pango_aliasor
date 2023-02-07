@@ -61,6 +61,12 @@ def test_read_from_file(datadir):
     aliasor = Aliasor(alias_file=datadir.join('alias_key.json'))
     assert aliasor.compress('B.1.1.529.1') == 'BA.1'
 
+def test_read_from_url():
+    url = "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json"
+    aliasor = Aliasor(alias_url=url)
+    assert aliasor.compress('B.1.1.529.1') == 'BA.1'
+    assert aliasor.uncompress('BE.1') == 'B.1.1.529.5.3.1.1'
+
 def test_partial_alias_up_to():
     aliasor = Aliasor()
     assert aliasor.partial_compress('B.1.1.529.1.2', up_to = 0) == 'B.1.1.529.1.2'
