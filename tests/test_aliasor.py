@@ -58,7 +58,7 @@ def test_double_alias_uncompression():
     assert aliasor.uncompress('BE.1') == 'B.1.1.529.5.3.1.1'
 
 def test_read_from_file(datadir):
-    aliasor = Aliasor(datadir.join('alias_key.json'))
+    aliasor = Aliasor(alias_file=datadir.join('alias_key.json'))
     assert aliasor.compress('B.1.1.529.1') == 'BA.1'
 
 def test_partial_alias_up_to():
