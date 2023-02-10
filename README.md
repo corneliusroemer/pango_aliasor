@@ -27,6 +27,9 @@ aliasor.uncompress("XA") # 'XA'
 # Go from unaliased lineage to aliased lineage
 aliasor.compress("B.1.1.529.3.1") # 'BA.3.1'
 
+# Find parent lineage
+aliasor.parent("BQ.1") # 'BE.1.1.1'
+
 aliasor.partial_compress("B.1.1.529.3.1",up_to=1) # 'BA.3.1'
 aliasor.partial_compress("B.1.1.529.3.1.1.2",up_to=1) # 'BA.3.1.1.2'
 
