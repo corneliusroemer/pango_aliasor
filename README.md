@@ -1,4 +1,5 @@
 [![Python package](https://github.com/corneliusroemer/pango_aliasor/actions/workflows/pytest.yaml/badge.svg)](https://github.com/corneliusroemer/pango_aliasor/actions/workflows/pytest.yaml)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/pango_aliasor/README.html)
 
 Python convenience library to translate between aliased and unaliased Pango lineages
 
