@@ -48,6 +48,12 @@ class Aliasor:
         else:
             return unaliased + "." + ".".join(name_split[1:])
     
+    def parent(self, name):
+        """
+        Returns parent lineage in aliased format or '' if at top level
+        """
+        return self.compress(".".join(self.uncompress(name).split(".")[:-1]))
+    
     def partial_compress(self, name, up_to: int = 0, accepted_aliases: set = {}):
         """
         aliasor.partial_compress("B.1.1.529.3.1",up_to=1) # 'BA.3.1'
