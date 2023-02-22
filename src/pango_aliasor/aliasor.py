@@ -26,9 +26,9 @@ class Aliasor:
     def compress(self, name, assign=False):
         """
         Returns the compressed lineage name. 
-        Set assign to True to automatically define new compressions for otherwise unhandled designations. 
-        For example, if you want to compress 'BA.5.2.5.6', and if BA.5.2.5 were not aliased, 
-        it would assign BA.5.2.5 to the next available code (in this example, EN) and return EN.5.6.
+        Set assign to True to automatically define new aliases for otherwise unhandled designations. 
+        For example, if you want to compress 'BA.5.2.5.6', and if BA.5.2.5 were not an accepted alias, 
+        it would assign BA.5.2.5 to the next available code (in this example, EN) and return EN.6.
         Recombinant lineages (prefixed with 'X') are treated as a separate set of available aliases
         and will always return an alias prefixed with 'X'.
         """
@@ -41,7 +41,7 @@ class Aliasor:
         ending = ".".join(name_split[(3 * num_indirections + 1) :])
         if assign and alias not in self.realias_dict:
             #note- this cannot produce lineage aliases prefixed with X, which are handled separately as they represent recombinants.
-            self.assign_compression(alias)
+            self.assign_alias(alias)
         return self.realias_dict[alias] + "." + ending
 
     def uncompress(self, name):
@@ -139,7 +139,7 @@ class Aliasor:
             level += 1
         return num
 
-    def next_available_compression(self, recombinant=False):
+    def next_available_alias(self, recombinant=False):
         """
         Returns the next available alias string. 
         Tracks recombinants separately; set recombinant to True to get the next available recombinant alias.
@@ -151,11 +151,11 @@ class Aliasor:
             current = [Aliasor._stringToNumber(k) for k in self.alias_dict.keys() if k[0] != 'X']
             return Aliasor._numberToString(max(current) + 1)
 
-    def assign_compression(self, name, recombinant=False):
+    def assign_alias(self, name, recombinant=False):
         """
         Assigns the input name to the next available alias. 
         Set recombinant to True to assign it to the next recombinant alias.
         """
-        nextn = self.next_available_compression(recombinant)
+        nextn = self.next_available_alias(recombinant)
         self.alias_dict[nextn] = name
         self.realias_dict[name] = nextn

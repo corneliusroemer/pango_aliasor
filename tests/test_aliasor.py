@@ -94,7 +94,7 @@ def test_parent():
 
 def test_next_compression():
     aliasor = Aliasor()
-    n1 = aliasor.next_available_compression()
-    n2 = aliasor.next_available_compression(True)
+    n1 = aliasor.next_available_alias()
+    n2 = aliasor.next_available_alias(True)
     assert n2[0] == 'X'
     assert n1 != n2
