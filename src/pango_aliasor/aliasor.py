@@ -1,4 +1,3 @@
-#%%
 class Aliasor:
     def __init__(self, alias_file=None):
         import json
@@ -24,7 +23,7 @@ class Aliasor:
 
         self.realias_dict = {v: k for k, v in self.alias_dict.items()}
 
-    def compress(self, name):
+    def compress(self, name, assign=False):
         name_split = name.split(".")
         levels = len(name_split) - 1
         num_indirections = (levels - 1) // 3
@@ -32,6 +31,8 @@ class Aliasor:
             return name
         alias = ".".join(name_split[0 : (3 * num_indirections + 1)])
         ending = ".".join(name_split[(3 * num_indirections + 1) :])
+        if assign and alias not in self.realias_dict:
+            self.assign_compression(alias)
         return self.realias_dict[alias] + "." + ending
 
     def uncompress(self, name):
@@ -89,6 +90,50 @@ class Aliasor:
         if name_split[(3 * up_to + 1) :] == []:
             return alias
         return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
+    
+    @staticmethod
+    def _charToB(char):        
+        return ord(char)-65
 
+    @staticmethod
+    def _bToChar(n, banned='IOX'):
+        l = chr(n+65)
+        while l in banned:
+            n += 1
+            l = chr(n+65)
+        return l
 
-# %%
+    @staticmethod
+    def _numberToString(n, b=23, banned='IOX'):
+        #convert the number to base 23
+        if n == 0:
+            return [0]
+        digits = []
+        while n:
+            digits.append(int(n % b))
+            print(int(n%b))
+            n //= b
+        #convert the base 23 to an alphabet string
+        return "".join([Aliasor._bToChar(d,banned) for d in digits[::-1]])
+
+    @staticmethod
+    def _stringToNumber(cstr, b=23):
+        #convert the string to a base23 number
+        digits = [Aliasor._charToB(c) for c in cstr]
+        #add the digits up to make a base10 number
+        num = 0
+        level = 0
+        for d in digits[::-1]:
+            num += d * b**level
+            level += 1
+        return num
+
+    def next_available_compression(self):
+        #ignore recombinant lineages, which require special manual name conventions.
+        current = [Aliasor._stringToNumber(k) for k in self.alias_dict.keys() if k[0] != 'X']
+        return Aliasor._numberToString(max(current) + 1)
+
+    def assign_compression(self, name):
+        nextn = self.next_available_compression()
+        self.alias_dict[nextn] = name
+        self.realias_dict[name] = nextn
