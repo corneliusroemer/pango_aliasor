@@ -111,7 +111,6 @@ class Aliasor:
         digits = []
         while n:
             digits.append(int(n % b))
-            print(int(n%b))
             n //= b
         #convert the base 23 to an alphabet string
         return "".join([Aliasor._bToChar(d,banned) for d in digits[::-1]])
