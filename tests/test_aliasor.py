@@ -91,3 +91,7 @@ def test_parent():
     assert aliasor.parent('A') == ''
     assert aliasor.parent('B') == ''
     assert aliasor.parent('C.1') == 'B.1.1.1'
+
+def test_next_compression():
+    aliasor = Aliasor()
+    aliasor.next_available_compression()
