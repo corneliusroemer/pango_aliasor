@@ -27,8 +27,8 @@ class Aliasor:
         """
         Returns the compressed lineage name. 
         Set assign to True to automatically define new aliases for otherwise unhandled designations. 
-        For example, if you want to compress 'BA.5.2.5.6', and if BA.5.2.5 did not have an accepted alias, 
-        it would assign BA.5.2.5 to the next available code (in this example, EN) and return EN.6.
+        For example, if you want to compress 'BA.5.2.5.6', and BA.5.2.5 does not have an accepted alias, 
+        it will assign BA.5.2.5 to the next available code (in this example, EN) and return EN.6.
         """
         name_split = name.split(".")
         levels = len(name_split) - 1
