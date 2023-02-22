@@ -104,7 +104,7 @@ class Aliasor:
         return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
     
     @staticmethod
-    def _charToB(char):        
+    def _charToB(char):
         return ord(char)-65
 
     @staticmethod
@@ -116,20 +116,20 @@ class Aliasor:
         return l
 
     @staticmethod
-    def _numberToString(n, b=23, banned='IOX'):
-        #convert the number to base 23
+    def _numberToString(n, b=26, banned='IOX'):
+        #convert the number to base 26
         if n == 0:
             return [0]
         digits = []
         while n:
             digits.append(int(n % b))
             n //= b
-        #convert the base 23 to an alphabet string
+        #convert the base 26 to an alphabet string, incrementing past banned characters
         return "".join([Aliasor._bToChar(d,banned) for d in digits[::-1]])
 
     @staticmethod
-    def _stringToNumber(cstr, b=23):
-        #convert the string to a base23 number
+    def _stringToNumber(cstr, b=26):
+        #convert the string to a base26 number
         digits = [Aliasor._charToB(c) for c in cstr]
         #add the digits up to make a base10 number
         num = 0
