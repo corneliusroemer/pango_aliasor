@@ -29,8 +29,6 @@ class Aliasor:
         Set assign to True to automatically define new aliases for otherwise unhandled designations. 
         For example, if you want to compress 'BA.5.2.5.6', and if BA.5.2.5 did not have an accepted alias, 
         it would assign BA.5.2.5 to the next available code (in this example, EN) and return EN.6.
-        Recombinant lineages (prefixed with 'X') are treated as a separate set of available aliases
-        and will always return an alias prefixed with 'X'.
         """
         name_split = name.split(".")
         levels = len(name_split) - 1
