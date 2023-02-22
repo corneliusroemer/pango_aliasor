@@ -99,3 +99,14 @@ def test_next_compression():
     n2 = aliasor.next_available_alias(True)
     assert n2[0] == 'X'
     assert n1 != n2
+
+def test_assign_compression():
+    aliasor = Aliasor()
+    n1 = aliasor.next_available_alias()
+    aliasor.assign_alias('test')
+    assert aliasor.realias_dict['test'] == n1
+    assert aliasor.alias_dict[n1] == 'test'
+    n2 = aliasor.next_available_alias(True)
+    aliasor.assign_alias('test2',True)
+    assert aliasor.realias_dict['test2'] == n2
+    assert aliasor.alias_dict[n2] == 'test2'
