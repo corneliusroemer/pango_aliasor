@@ -24,6 +24,12 @@ class Aliasor:
         self.realias_dict = {v: k for k, v in self.alias_dict.items()}
 
     def compress(self, name, assign=False):
+        """
+        Returns the compressed lineage name. Set assign to True to automatically define new compressions for otherwise unhandled designations. 
+        For example, if you want to compress 'BA.5.2.5.6', and if BA.5.2.5 were not aliased, 
+        it would assign BA.5.2.5 to the next available code (in this example, EN) and return EN.5.6.
+        Recombinant lineages (prefixed with 'X') are treated as a separate set of available aliases and will always return an alias prefixed with 'X'.
+        """
         name_split = name.split(".")
         levels = len(name_split) - 1
         num_indirections = (levels - 1) // 3
@@ -32,10 +38,13 @@ class Aliasor:
         alias = ".".join(name_split[0 : (3 * num_indirections + 1)])
         ending = ".".join(name_split[(3 * num_indirections + 1) :])
         if assign and alias not in self.realias_dict:
-            self.assign_compression(alias)
+            self.assign_compression(alias, (alias[0]=='X'))
         return self.realias_dict[alias] + "." + ending
 
     def uncompress(self, name):
+        """
+        Returns the uncompressed lineage name.
+        """
         name_split = name.split(".")
         letter = name_split[0]
         try:
@@ -127,12 +136,21 @@ class Aliasor:
             level += 1
         return num
 
-    def next_available_compression(self):
-        #ignore recombinant lineages, which require special manual name conventions.
-        current = [Aliasor._stringToNumber(k) for k in self.alias_dict.keys() if k[0] != 'X']
-        return Aliasor._numberToString(max(current) + 1)
+    def next_available_compression(self, recombinant=False):
+        """
+        Returns the next available alias string. Tracks recombinants separately; set recombinant to True to get the next available recombinant alias.
+        """
+        if recombinant:
+            current = [Aliasor._stringToNumber(k[1:]) for k in self.alias_dict.keys() if k[0] == 'X']
+            return 'X' + Aliasor._numberToString(max(current) + 1)
+        else:
+            current = [Aliasor._stringToNumber(k) for k in self.alias_dict.keys() if k[0] != 'X']
+            return Aliasor._numberToString(max(current) + 1)
 
-    def assign_compression(self, name):
-        nextn = self.next_available_compression()
+    def assign_compression(self, name, recombinant=False):
+        """
+        Assigns the input name to the next available alias. Set recombinant to True to set it to the next recombinant alias.
+        """
+        nextn = self.next_available_compression(recombinant)
         self.alias_dict[nextn] = name
         self.realias_dict[name] = nextn
