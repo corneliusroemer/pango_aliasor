@@ -9,18 +9,18 @@ class Aliasor:
             with urllib.request.urlopen(
                 "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json"
             ) as data:
-                pango_dict = json.load(data)
+                file = json.load(data)
 
         else:
             with open(alias_file) as file:
-                pango_dict = json.load(file)
+                file = json.load(file)
 
         self.alias_dict = {}
-        for column in pango_dict.keys():
-            if type(pango_dict[column]) is list or pango_dict[column] == "":
+        for column in file.keys():
+            if type(file[column]) is list or file[column] == "":
                 self.alias_dict[column] = column
             else:
-                self.alias_dict[column] = pango_dict[column]
+                self.alias_dict[column] = file[column]
 
         self.realias_dict = {v: k for k, v in self.alias_dict.items()}
         self.pango_list=[]
@@ -48,7 +48,51 @@ class Aliasor:
             return unaliased + "." + name_split[1]
         else:
             return unaliased + "." + ".".join(name_split[1:])
+    def parent(self, name):
+        """
+        Returns parent lineage in aliased format or '' if at top level
+        """
+        return self.compress(".".join(self.uncompress(name).split(".")[:-1]))
+    def partial_compress(self, name, up_to: int = 0, accepted_aliases: set = {}):
+        """
+        aliasor.partial_compress("B.1.1.529.3.1",up_to=1) # 'BA.3.1'
+        aliasor.partial_compress("B.1.1.529.3.1.1.2",up_to=1) # 'BA.3.1.1.2'
+
+        aliasor.partial_compress("B.1.1.529.3.1",accepted_aliases=["AY"]) # 'B.1.1.529.3.1'
+        aliasor.partial_compress("B.1.617.2",accepted_aliases=["AY"]) # 'AY.2'
+        """
+        # If accepted_aliases is passed without up_to set, then try out all possible values
+        name_split = name.split(".")
+        levels = len(name_split) - 1
+        indirections = (levels - 1) // 3
+
+        alias = name_split[0]
+
+        if up_to > 0:
+            if indirections <= up_to:
+                return self.compress(name)
+            to_alias = ".".join(name_split[0 : (3 * up_to + 1)])
+            alias = self.realias_dict[to_alias]
+        
+        # Compress at least till up_to, maybe further
+
+        # Check if levels beyond up_to (working backwards) are in accepted_aliases
+        if accepted_aliases is not {}:
+            for level in range(indirections,up_to,-1):
+                to_alias = ".".join(name_split[0 : (3 * level + 1)])
+                if to_alias in self.realias_dict.keys():
+                    if self.realias_dict[to_alias] in accepted_aliases:
+                        alias = self.realias_dict[to_alias]
+                        return alias + "." + ".".join(name_split[(3 * level + 1) :])
+
+        if name_split[(3 * up_to + 1) :] == []:
+            return alias
+        return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
+
     
+    """
+    Can be useful to know lineage substructure
+    """
     def enable_expansion(self):
         import urllib.request
         with urllib.request.urlopen(
@@ -92,41 +136,6 @@ class Aliasor:
                 result.append(k)
         return result
     
-    def partial_compress(self, name, up_to: int = 0, accepted_aliases: set = {}):
-        """
-        aliasor.partial_compress("B.1.1.529.3.1",up_to=1) # 'BA.3.1'
-        aliasor.partial_compress("B.1.1.529.3.1.1.2",up_to=1) # 'BA.3.1.1.2'
-
-        aliasor.partial_compress("B.1.1.529.3.1",accepted_aliases=["AY"]) # 'B.1.1.529.3.1'
-        aliasor.partial_compress("B.1.617.2",accepted_aliases=["AY"]) # 'AY.2'
-        """
-        # If accepted_aliases is passed without up_to set, then try out all possible values
-        name_split = name.split(".")
-        levels = len(name_split) - 1
-        indirections = (levels - 1) // 3
-
-        alias = name_split[0]
-
-        if up_to > 0:
-            if indirections <= up_to:
-                return self.compress(name)
-            to_alias = ".".join(name_split[0 : (3 * up_to + 1)])
-            alias = self.realias_dict[to_alias]
-        
-        # Compress at least till up_to, maybe further
-
-        # Check if levels beyond up_to (working backwards) are in accepted_aliases
-        if accepted_aliases is not {}:
-            for level in range(indirections,up_to,-1):
-                to_alias = ".".join(name_split[0 : (3 * level + 1)])
-                if to_alias in self.realias_dict.keys():
-                    if self.realias_dict[to_alias] in accepted_aliases:
-                        alias = self.realias_dict[to_alias]
-                        return alias + "." + ".".join(name_split[(3 * level + 1) :])
-
-        if name_split[(3 * up_to + 1) :] == []:
-            return alias
-        return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
 
     """
     Carves up an array of pangolin lineages to non-overlapping sublineages. Useful for stack plots and other allocations to prevent double counting.
@@ -153,8 +162,9 @@ class Aliasor:
     """
     For the given array, produce a dictionary of who subsumes who.
     """
-    def map_dependent(self,vocs): 
-        #instead of prefixes check for proper subsets of expansions, if they exclude them all
+    def map_dependent(self,vocs):
+        #instead of prefixes check for proper subsets of expansions
+        #doesn't strictly require pango_list expansion could be done with prefix logic
         result={}
         voc_dict = {k:{"exclude":set([]),"query":set(self.expand_compress(k))} for k in vocs}
         for i,k in enumerate(vocs):
