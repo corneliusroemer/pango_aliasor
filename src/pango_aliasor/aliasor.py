@@ -182,4 +182,22 @@ class Aliasor:
             result[compressed]=decompressed
         return result
 
+    """
+    Order a list of vocs by vertical descent so that parent lineages come before their children
+    """
+    def vd_ordering(self,vocs):
+        voc_set=set(vocs)
+        def split_lineage(lineage):
+            """Split a lineage into sortable parts"""
+            return tuple(int(part) if part.isdigit() else part for part in lineage.split('.'))
+
+        def my_key(item):
+            return split_lineage(item[0])
+
+        inv_map = {v: k for k, v in self.map_alias(vocs).items()}
+        vd_ordered = sorted(inv_map.items(), key=my_key)
+        #express the result in terms of the original vocs either aliased or expanded
+        result= [i[0] if i[0] in voc_set else i[1] for i in vd_ordered]
+        return result
+
 # %%
