@@ -22,7 +22,8 @@ class Aliasor:
             else:
                 self.alias_dict[column] = pango_dict[column]
 
-        self.realias_dict = {v: k for k, v in self.alias_dict.items()} 
+        self.realias_dict = {v: k for k, v in self.alias_dict.items()}
+        self.pango_list=[]
 
     def compress(self, name):
         name_split = name.split(".")
@@ -58,7 +59,12 @@ class Aliasor:
                 if line:
                     self.pango_list.append(self.uncompress(line.split()[0]))
     
+    """
+    Expand the lineage to include all descendants. Use compressed format
+    """
     def expand_compress(self, name, exclude=[]):
+        if len(self.pango_list) == 0:
+            self.enable_expansion()
         full_prefix=self.uncompress(name)
         result=[] 
         exclude_full = set([j for i in exclude for j in self.expand_uncompress(i)]) if exclude else set([])
@@ -69,8 +75,12 @@ class Aliasor:
             if k not in exclude_full and k.startswith(full_prefix):
                 result.append(self.compress(k))
         return result
-
+    """
+    Expand the lineage to include all descendants. Use uncompressed format
+    """
     def expand_uncompress(self, name, exclude=[]):
+        if len(self.pango_list) == 0:
+            self.enable_expansion()
         full_prefix=self.uncompress(name)
         result=[]
         exclude_full = set([j for i in exclude for j in self.expand_uncompress(i)]) if exclude else set([])
@@ -119,7 +129,7 @@ class Aliasor:
         return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
 
     """
-    Carves up an array of pangolin lineages to non-overlapping sublineages
+    Carves up an array of pangolin lineages to non-overlapping sublineages. Useful for stack plots and other allocations to prevent double counting.
     """
     def partition_focus(self,vocs,remove_self=True): 
         #instead of prefixes check for proper subsets of expansions, if they exclude them all
@@ -172,56 +182,4 @@ class Aliasor:
             result[compressed]=decompressed
         return result
 
-    """
-    Count ancestors given map_dependent
-    """
-    def count_ancestors(self, individual, tree):
-        count = 0
-        # loop through the tree
-        for parent, children in tree.items():
-            if individual in children:
-                count += 1
-                count += self.count_ancestors(parent, tree)
-                # break the loop as the individual can have only one parent in the tree
-                break
-        # return the count
-        return count
-
-    """
-    Count descendants given map_dependent
-    """
-    def count_descendants(self, individual, tree):
-        count = 0
-        # check if the individual is a parent in the tree
-        if individual in tree:
-            children = tree[individual]
-            # add the number of children to the count
-            count += len(children)
-            # loop through the children and recursively add the number of descendants of each child
-            for child in children:
-                count += self.count_descendants(child, tree)
-            # return the count
-        return count
-
-    """
-    For the given array, order the vocs so the most specific come first
-    """
-    def bottom_up_ordering(self,vocs): 
-        tree = self.map_dependent(vocs)
-        individuals=[]
-        marked=set([])
-        for parent, children in tree.items():
-            # append the parent and their ancestor count
-            if parent not in marked:
-                marked.add(parent)
-                individuals.append((parent, self.count_descendants(parent, tree)))
-            # loop through the children and append them and their ancestor counts
-            for child in children:
-                if child not in marked:
-                    marked.add(child)
-                    individuals.append((child, self.count_descendants(child, tree)))
-        individuals.sort(key=lambda x: x[1])
-        print(individuals) 
-        result = [i[0] for i in individuals]
-        return result
 # %%
