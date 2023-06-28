@@ -154,8 +154,74 @@ class Aliasor:
                     jset=voc_dict.get(j).get("query")
                     if jset.issubset(kset):
                         result.setdefault(k,set([])).add(j)
-                    if kset.issubset(jset):
+                    elif kset.issubset(jset):
                         result.setdefault(j,set([])).add(k)
+                    else:
+                        result.setdefault(j,set([]))
+        return result
+    
+    """
+    For the given array, produce a dictionary mapping of the alias to the full name.
+    """
+    def map_alias(self,vocs): 
+        #instead of prefixes check for proper subsets of expansions, if they exclude them all
+        result={}
+        for i in vocs:
+            compressed=self.compress(i)
+            decompressed=self.uncompress(i)
+            result[compressed]=decompressed
         return result
 
+    """
+    Count ancestors given map_dependent
+    """
+    def count_ancestors(self, individual, tree):
+        count = 0
+        # loop through the tree
+        for parent, children in tree.items():
+            if individual in children:
+                count += 1
+                count += self.count_ancestors(parent, tree)
+                # break the loop as the individual can have only one parent in the tree
+                break
+        # return the count
+        return count
+
+    """
+    Count descendants given map_dependent
+    """
+    def count_descendants(self, individual, tree):
+        count = 0
+        # check if the individual is a parent in the tree
+        if individual in tree:
+            children = tree[individual]
+            # add the number of children to the count
+            count += len(children)
+            # loop through the children and recursively add the number of descendants of each child
+            for child in children:
+                count += self.count_descendants(child, tree)
+            # return the count
+        return count
+
+    """
+    For the given array, order the vocs so the most specific come first
+    """
+    def bottom_up_ordering(self,vocs): 
+        tree = self.map_dependent(vocs)
+        individuals=[]
+        marked=set([])
+        for parent, children in tree.items():
+            # append the parent and their ancestor count
+            if parent not in marked:
+                marked.add(parent)
+                individuals.append((parent, self.count_descendants(parent, tree)))
+            # loop through the children and append them and their ancestor counts
+            for child in children:
+                if child not in marked:
+                    marked.add(child)
+                    individuals.append((child, self.count_descendants(child, tree)))
+        individuals.sort(key=lambda x: x[1])
+        print(individuals) 
+        result = [i[0] for i in individuals]
+        return result
 # %%
