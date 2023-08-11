@@ -1,14 +1,15 @@
 #%%
 class Aliasor:
-    def __init__(self, alias_file=None):
+    def __init__(self, *, alias_file=None, alias_url=None):
         import json
 
         if alias_file is None:
             import urllib.request, json
 
-            with urllib.request.urlopen(
-                "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json"
-            ) as data:
+            if not alias_url:
+                alias_url = "https://raw.githubusercontent.com/cov-lineages/pango-designation/master/pango_designation/alias_key.json"
+
+            with urllib.request.urlopen(alias_url) as data:
                 file = json.load(data)
 
         else:
@@ -89,6 +90,5 @@ class Aliasor:
         if name_split[(3 * up_to + 1) :] == []:
             return alias
         return alias + "." + ".".join(name_split[(3 * up_to + 1) :])
-
 
 # %%
