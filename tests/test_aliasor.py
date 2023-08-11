@@ -91,3 +91,22 @@ def test_parent():
     assert aliasor.parent('A') == ''
     assert aliasor.parent('B') == ''
     assert aliasor.parent('C.1') == 'B.1.1.1'
+
+def test_next_compression():
+    aliasor = Aliasor()
+    n1 = aliasor.next_available_alias()
+    assert n1 not in aliasor.alias_dict.keys()
+    n2 = aliasor.next_available_alias(True)
+    assert n2[0] == 'X'
+    assert n1 != n2
+
+def test_assign_compression():
+    aliasor = Aliasor()
+    n1 = aliasor.next_available_alias()
+    aliasor.assign_alias('test')
+    assert aliasor.realias_dict['test'] == n1
+    assert aliasor.alias_dict[n1] == 'test'
+    n2 = aliasor.next_available_alias(True)
+    aliasor.assign_alias('test2',True)
+    assert aliasor.realias_dict['test2'] == n2
+    assert aliasor.alias_dict[n2] == 'test2'
