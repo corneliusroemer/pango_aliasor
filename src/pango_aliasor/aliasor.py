@@ -210,4 +210,21 @@ class Aliasor:
         result= [i[0] if i[0] in voc_set else i[1] for i in vd_ordered]
         return result
 
+    """
+    Return relationship between two lineages. ancestor, descendant, outgroup
+    """
+    def relationship(self, subject, predicate):
+        vocs=[subject,predicate]
+        voc_dict = {k:{"exclude":set([]),"query":set(self.expand_compress(k))} for k in vocs}
+        for i,k in enumerate(vocs):
+            if i+1 < len(vocs):
+                kset=voc_dict.get(k).get("query")
+        if subject in voc_dict.get(predicate).get("query")
+            return "descendant"
+        elif predicate in voc_dict.get(subject).get("query")
+            return "ancestor"
+        else:
+            return "outgroup"
+
+
 # %%
