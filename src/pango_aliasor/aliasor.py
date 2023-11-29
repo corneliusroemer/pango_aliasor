@@ -219,9 +219,9 @@ class Aliasor:
         for i,k in enumerate(vocs):
             if i+1 < len(vocs):
                 kset=voc_dict.get(k).get("query")
-        if subject in voc_dict.get(predicate).get("query")
+        if subject in voc_dict.get(predicate).get("query"):
             return "descendant"
-        elif predicate in voc_dict.get(subject).get("query")
+        elif predicate in voc_dict.get(subject).get("query"):
             return "ancestor"
         else:
             return "outgroup"
