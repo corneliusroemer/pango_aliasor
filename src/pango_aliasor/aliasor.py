@@ -16,9 +16,18 @@ class Aliasor:
                 file = json.load(file)
 
         self.alias_dict = {}
+        #store the parents of recombinants
+        self.recomb2parents={}
+        #store which variants contain recombinants
+        self.parents2recomb={}
         for column in file.keys():
             if type(file[column]) is list or file[column] == "":
+                #variant prefix just points to itself for recombinants in this data structure
                 self.alias_dict[column] = column
+                parent_list=file[column]
+                self.recomb2parents[column]=parent_list
+                for parent in parent_list:
+                    self.parents2recomb.setdefault(self.uncompress(parent),[]).append(self.uncompress(column))
             else:
                 self.alias_dict[column] = file[column]
 
@@ -43,7 +52,7 @@ class Aliasor:
         except KeyError:
             return name
         if len(name_split) == 1:
-            return name
+            return unaliased
         if len(name_split) == 2:
             return unaliased + "." + name_split[1]
         else:
@@ -105,19 +114,30 @@ class Aliasor:
     
     """
     Expand the lineage to include all descendants. Use compressed format
+    Jumps over recombinants using prefix logic is getting a bit messy / expenseive
+    Probably should just model the DAG and do a traversal
     """
-    def expand_compress(self, name, exclude=[]):
+    def expand_compress(self, name, exclude=[], recombinants=False):
         if len(self.pango_list) == 0:
             self.enable_expansion()
         full_prefix=self.uncompress(name)
+        all_prefixes=[]
+        if recombinants:
+            #check the parent2recomb dictionary to see if full_prefix is a parent of a recombinant
+            for k, v in self.parents2recomb.items():
+                if k.startswith(full_prefix):
+                    all_prefixes.extend(v)
+        all_prefixes.append(full_prefix)
         result=[] 
         exclude_full = set([j for i in exclude for j in self.expand_uncompress(i)]) if exclude else set([])
         if self.uncompress(name) not in exclude_full:
             result.append(self.compress(name)) #hack to make the parent name come first
             exclude_full.add(self.uncompress(name))
         for k in self.pango_list:
-            if k not in exclude_full and k.startswith(full_prefix):
-                result.append(self.compress(k))
+            if k not in exclude_full:
+                for cur_prefix in all_prefixes:
+                     if k.startswith(cur_prefix):
+                        result.append(self.compress(k))
         return result
     """
     Expand the lineage to include all descendants. Use uncompressed format
@@ -140,10 +160,11 @@ class Aliasor:
     """
     Carves up an array of pangolin lineages to non-overlapping sublineages. Useful for stack plots and other allocations to prevent double counting.
     """
-    def partition_focus(self,vocs,remove_self=True): 
+    def partition_focus(self,vocs,remove_self=True, recombinant=False): 
         #instead of prefixes check for proper subsets of expansions, if they exclude them all
         result={}
-        voc_dict = {k:{"exclude":set([]),"query":set(self.expand_compress(k))} for k in vocs}
+        #this dictionary stores subvariants in the query set
+        voc_dict = {k:{"exclude":set([]),"query":set(self.expand_compress(k, recombinants=recombinant))} for k in vocs}
         for i,k in enumerate(vocs):
             if i+1 < len(vocs):
                 kset=voc_dict.get(k).get("query")
@@ -164,7 +185,7 @@ class Aliasor:
     """
     def map_dependent(self,vocs):
         #instead of prefixes check for proper subsets of expansions
-        #doesn't strictly require pango_list expansion could be done with prefix logic
+        #doesn't strictly require pango_list expansion could be done with prefix logic (except for recombinants)
         result={}
         voc_dict = {k:{"exclude":set([]),"query":set(self.expand_compress(k))} for k in vocs}
         for i,k in enumerate(vocs):
@@ -194,6 +215,7 @@ class Aliasor:
 
     """
     Order a list of vocs by vertical descent so that parent lineages come before their children
+    Really dfs_ordering
     """
     def vd_ordering(self,vocs):
         voc_set=set(vocs)
